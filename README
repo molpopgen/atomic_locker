@@ -1,0 +1,20 @@
+Atomic locker is a program which reads from STDIN and writes to an output file. It uses advisory file locking such that multiple processes can write to the same file w/o error. It also writes an index file that contains the record ID for each entry and the offset where that ID starts. Programs like this solve the problem where you naively parallelize a job on a cluster and end up with zillions of small files. Doing so kills networked/distributed file system performance.
+
+To compile: g++ -O2 -o atomic_locker atomic_locker.cc locking_routines.cc -I.
+
+Example usage on a Grid Engine system with Dick Hudson’s “ms” installed:
+
+#!sh
+
+#$ -q queuename
+#$ -t 1-1000
+
+ms 1 -t 10 -r 10 1000 | atomic_locker $SGE_TASK_ID indexfile msfile
+
+After sending that to the grid, “msfile” will contain 1,000 “ms” records. The index file will contain two columns. The first is integers 0 to 999. The order of these is random, reflecting which job finished first and got the file lock. The second column is the offset (unsigned long, used by C functions like seek() and tell(), etc.) where the i-th “ms” record starts in the file.
+
+Note/warning: this has been developed on Linux. It compiles on OS X, but has never been used.
+
+Please note that your file system must support advisory file locking. In my experience, standard ext3 and gluster do. However, FhGFS does not by default, and this code will fail on such systems until file locking is enabled (which, on a cluster, must be done on a per-node basis, as we learned the hard way @ UCI).
+
+A perl example with similar functionality (file locking, but no indexing) can be found here and is from the IT crew at UCI.
