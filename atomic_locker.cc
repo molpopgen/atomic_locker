@@ -55,7 +55,7 @@ int main(int argc, char ** argv)
   while(rv != EOF);
 
   olock.l_type = F_UNLCK;
-  if (fcntl(ofd,F_UNLCK,&ilock) == -1)
+  if (fcntl(ofd,F_UNLCK,&olock) == -1)
     {
       cerr << "ERROR: could not release lock on " << outfile << '\n';
       exit(10);
