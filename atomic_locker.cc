@@ -52,7 +52,7 @@ int main(int argc, char ** argv)
       if(rv==0){exit(10);}
       fprintf(ofp,"%c",ch);
     }
-  while(rv != EOF);
+  while(rv != EOF && !feof(stdin));
 
   olock.l_type = F_UNLCK;
   if (fcntl(ofd,F_UNLCK,&olock) == -1)
